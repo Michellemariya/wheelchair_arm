@@ -1,0 +1,11 @@
+build/
+install/
+log/
+.vscode/
+__pycache__/
+*.pyc
+*.db
+*.sh
+*.sh.*
+Miniconda3-latest-Linux-x86_64.sh
+Miniconda3-latest-Linux-x86_64.sh.1

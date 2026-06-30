@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: wheelchair_arm_description
+    relative_path: urdf/URDF_9.urdf
+  srdf:
+    relative_path: config/URDF_9.srdf
+  package_settings:
+    author_name: MIchelle Mariya
+    author_email: michelle.nitt@gmail.com
+    generated_timestamp: 1782190432
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

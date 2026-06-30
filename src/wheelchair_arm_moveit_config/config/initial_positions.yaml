@@ -1,0 +1,10 @@
+# Default initial positions for URDF_9's ros2_control fake system
+
+initial_positions:
+  J_1: 0
+  J_2: 0
+  J_3: 0
+  J_4: 0
+  J_5: 0
+  J_6: 0
+  j_7: 0

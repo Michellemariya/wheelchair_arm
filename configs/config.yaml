@@ -1,0 +1,112 @@
+# configs/config.yaml
+# Single source of truth for all tunable parameters.
+# Edit this file — don't hardcode values anywhere in the pipeline.
+
+camera:
+  device_index: 2
+  width: 640
+  height: 480
+  calib_width: 640
+  calib_height: 480
+  fps: 30
+  calibration_file: "configs/camera_calibration.yaml"
+
+apriltag:
+  family: "tag36h11"
+  tag_size_meters: 0.04         # MEASURE YOUR PRINTED TAG WITH A RULER
+  tag_id: 0                     # ID of the tag mounted on the gripper
+  nthreads: 4
+  quad_decimate: 1.0            # 1.0 = full res, 2.0 = half res (faster)
+
+detection:
+  yolo_model: "yolov8n.pt"
+  fastsam_model: "FastSAM-s.pt"
+  confidence_threshold: 0.5
+  target_classes:               # COCO class IDs relevant to ADL tasks
+    39: "bottle"
+    41: "cup"
+    42: "fork"
+    43: "knife"
+    44: "spoon"
+    46: "bowl"
+    67: "cell phone"
+    73: "book"
+    76: "scissors"
+
+keypoints:
+  use_semantic: false           # set true when trained detectors available
+  use_geometric: true           # ORB/XFeat geometric keypoints
+  n_geometric_keypoints: 100    # number of ORB keypoints to extract
+  semantic_model_dir: "models/keypoints/"
+  schema:
+    bottle: ['cap', 'body', 'base']
+    cup: ['rim', 'handle_right', 'handle_left', 'base']
+    bowl: ['center', 'rim']
+    book: ['spine', 'center']
+  grasp_priority:
+    bottle: ['body', 'base', 'cap']
+    cup: ['handle_right', 'handle_left', 'rim', 'base']
+    bowl: ['rim', 'center']
+    book: ['center', 'spine']
+
+anygrasp:
+  checkpoint_path: "models/anygrasp/checkpoint_detection.tar"
+  # Request license: anygrasp@gmail.com
+  # Download weights from: https://github.com/graspnet/anygrasp_sdk
+  gripper_width_min: 0.01       # meters — minimum gripper opening
+  gripper_width_max: 0.105       # meters — maximum gripper opening
+  workspace_min: [-0.5, -0.5, 0.1]   # base frame bounds (meters)
+  workspace_max: [ 0.5,  0.5, 1.2]
+  top_k: 5                      # number of grasp candidates to return
+
+servo:
+  Kp_xy: 0.3                    # lateral proportional gain
+  Kp_z: 0.4                     # depth proportional gain
+  xy_threshold_pixels: 15       # convergence threshold (pixels)
+  z_threshold_meters: 0.02      # convergence threshold (meters)
+  max_velocity_ms: 0.05         # maximum gripper velocity (m/s)
+  timeout_seconds: 30
+  convergence_frames: 5         # consecutive converged frames before state change
+
+arm:
+  port: "/dev/ttyUSB0"
+  baud: 115200
+  num_joints: 5
+  grasp_current_threshold: 800  # mA — spike indicates gripper contact
+  home_position: [0.0, 0.5, 0.0, -1.0, 0.0]  # joint angles (radians)
+  joint_limits_rad:
+    - [-3.14, 3.14]   # j1
+    - [-1.57, 1.57]   # j2
+    - [-1.57, 1.57]   # j3
+    - [-3.14, 3.14]   # j4
+    - [-3.14, 3.14]   # j5
+
+transforms:
+  T_cam_to_base_file: "configs/T_cam_to_base.npy"
+  tip_offset: [0.0, 0.0, 0.0]  # meters from tag center to gripper tip
+                                 # MEASURE THIS PHYSICALLY
+
+localization:
+  # Table plane is OPTIONAL — used as a fast fallback
+  # when monocular depth is unavailable or fails
+  use_table_plane: false         # set true if you calibrate the plane
+  table_plane_file: "configs/table_plane.npy"
+  min_depth_m: 0.10             # sanity check: minimum plausible depth (m)
+  max_depth_m: 2.00             # sanity check: maximum plausible depth (m)
+  max_depth_meters: 5.0
+  min_depth_meters: 0.05
+  max_depth_meters: 5.0
+  mask_erosion_pixels: 3
+
+motion_planning:
+  backend: "auto"               # "pybullet", "moveit2", or "auto"
+  urdf_path: null               # path to arm URDF (get from mechanical team)
+  velocity_scale: 0.3           # 0..1 fraction of max velocity
+  acceleration_scale: 0.3
+  
+grasp:
+  pre_grasp_offset_meters: 0.15
+  grasp_surface_offset_meters: 0.01
+  
+simulation:
+  ee_link_index: 6    # set once URDF is loaded — check with p.getJointInfo()
